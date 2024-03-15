@@ -6,23 +6,53 @@ if (!isset($_SESSION['userid'])) {
     exit();
 } else {
     $username = $_SESSION['username'];
+    $userid = $_SESSION['userid'];
 }
 try {
     // Запрос SQL
-    $sql = "SELECT * FROM newsfeed ORDER BY date DESC";
+    $sql_feed = "SELECT * FROM newsfeed ORDER BY date DESC";
 
     // Подготовка запроса
-    $result = pg_prepare($connection, "get_news", $sql);
+    $result_feed = pg_prepare($connection, "get_news", $sql_feed);
 
     // Выполнение запроса
-    $res = pg_execute($connection, "get_news", []);
+    $res_feed = pg_execute($connection, "get_news", []);
 
     //Получение результатов
-    $news = pg_fetch_all($res, PGSQL_ASSOC);
+    $news = pg_fetch_all($res_feed, PGSQL_ASSOC);
+
+    $sql_image = "SELECT image FROM users WHERE id = $1";
+
+    $result_image = pg_prepare($connection, "get_image", $sql_image);
+
+    $res_image = pg_execute($connection, "get_image", array($userid));
+
+    $user = pg_fetch_array($res_image);
+
+    $fileExtesions = ["jpg", "jpeg", "png"];
+
+    foreach ($fileExtesions as $ext) {
+
+        $imagePath = "images/users/{$username}.{$ext}";
+
+        if (file_exists($imagePath)) {
+            break;
+        }
+
+    }
+
+    if (!file_exists($imagePath)) {
+        $imagePath = "images/users/default.png";
+    }
+
 } catch (Exception $e) {
+
     echo $e->getMessage();
+
 }
 ?>
+
+
 <!DOCTYPE html>
 <html>
 
@@ -66,8 +96,12 @@ try {
                             <a href="#"
                                 class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
                                 id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                                <img src="images/s.bakharev.jpg" alt="hugenerd" width="30" height="30"
-                                    class="rounded-circle">
+
+
+                                <img src='<?php echo $imagePath; ?>' alt="sad" width="30"
+
+
+                                    height="30" class="rounded-circle">
                                 <span class="d-none d-sm-inline mx-1">
                                     <?php echo $username; ?>
                                 </span>
@@ -183,4 +217,5 @@ try {
     <script src="js/bootstrap.min.js"></script>
     <script src="js/main.js" defer></script>
 </body>
+
 </html>
