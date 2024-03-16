@@ -1,7 +1,8 @@
 <?php
 include_once 'config/db.php';
 session_start();
-if (!isset($_SESSION['userid'])) {
+date_default_timezone_set('Asia/Novosibirsk');
+if (!isset ($_SESSION['userid'])) {
     header("Location: login.php");
     exit();
 } else {
@@ -43,6 +44,18 @@ try {
 
     if (!file_exists($imagePath)) {
         $imagePath = "images/users/default.png";
+    }
+
+    foreach ($news as $item) {
+        $color = 'black'; // цвет по умолчанию
+
+        if ($item['subject'] == 'Green') {
+            $color = 'green';
+        } else if ($item['subject'] == 'Red') {
+            $color = 'red';
+        } else if ($item['subject'] == 'Neutral') {
+            $color = 'gray';
+        }
     }
 
 } catch (Exception $e) {
@@ -98,10 +111,8 @@ try {
                                 id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
 
 
-                                <img src='<?php echo $imagePath; ?>' alt="sad" width="30"
-
-
-                                    height="30" class="rounded-circle">
+                                <img src='<?php echo $imagePath; ?>' alt="sad" width="30" height="30"
+                                    class="rounded-circle">
                                 <span class="d-none d-sm-inline mx-1">
                                     <?php echo $username; ?>
                                 </span>
@@ -156,12 +167,12 @@ try {
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-sm-4 m-3">
-                            <div class="row block-panel shadow">
+                            <div class="row block-panel shadow" style="height: 50%;">
                                 <div class="col-lg-12 col-md-12 col-sm-12 sidebar-page-container">
                                     <div class="sidebar">
                                         <div class="sidebar-widget sidebar-post">
-                                            <div class="widget-title">
-                                                <h3>News Feed</h3>
+                                            <div class="widget-title" style="height: 50%;">
+                                                <h3>Лента</h3>
                                             </div>
                                             <div class="post-inner">
                                                 <div class="carousel-inner-data">
@@ -170,9 +181,9 @@ try {
                                                         foreach ($news as $item) {
                                                             echo "<li>";
                                                             echo "<div class=\"post\">";
+                                                            echo "<div class=\"file-box\"><i class=\"far fa-folder-open\"></i><p>" . htmlspecialchars($item['subject']) . " - <span class=\"time\">" . date('H:i', strtotime(htmlspecialchars($item['time']))) . "</span></p></div>";
                                                             echo "<div class=\"post-date\"><p>" . htmlspecialchars(date('d', strtotime($item['date']))) . "</p><span>" . htmlspecialchars(date('M', strtotime($item['date']))) . "</span></div>";
-                                                            echo "<div class=\"file-box\"><i class=\"far fa-folder-open\"></i><p>Subject</p></div>";
-                                                            echo "<h5><a href=\"#\">" . htmlspecialchars($item['subject']) . "</a></h5>";
+                                                            echo "<h5><p>" . htmlspecialchars($item['message']) . "</p></h5>";
                                                             echo "</div>";
                                                             echo "</li>";
                                                         }
@@ -187,8 +198,18 @@ try {
                         </div>
                         <div class="col-sm-7">
                             <div class="row">
-                                <div class="col m-3 block-panel shadow">
-                                    <p>Это первая мини-плитка второй колонки первой строки</p>
+                                <div class="col m-3 block-panel shadow" style="text-align: center;">
+                                    <p>
+                                        <img src='<?php echo $imagePath; ?>' alt="sad" width="75%" height="75%"
+                                            class="rounded">
+                                    </p>
+                                    <p>
+                                        У
+                                        <?php echo $username ?> день рождения!
+                                    </p>
+                                    <p>
+                                        Насри ему на стул, пусть он обрадуется!
+                                    </p>
                                 </div>
 
                                 <div class="col m-3 block-panel shadow">

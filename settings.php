@@ -1,13 +1,72 @@
 <?php
+include_once 'config/db.php';
 session_start();
-if (!isset($_SESSION['userid'])) {
+date_default_timezone_set('Asia/Novosibirsk');
+if (!isset ($_SESSION['userid'])) {
     header("Location: login.php");
     exit();
 } else {
     $username = $_SESSION['username'];
+    $userid = $_SESSION['userid'];
 }
 
+try {
+    // Запрос SQL
+    $sql_feed = "SELECT * FROM newsfeed ORDER BY date DESC";
+
+    // Подготовка запроса
+    $result_feed = pg_prepare($connection, "get_news", $sql_feed);
+
+    // Выполнение запроса
+    $res_feed = pg_execute($connection, "get_news", []);
+
+    //Получение результатов
+    $news = pg_fetch_all($res_feed, PGSQL_ASSOC);
+
+    $sql_image = "SELECT image FROM users WHERE id = $1";
+
+    $result_image = pg_prepare($connection, "get_image", $sql_image);
+
+    $res_image = pg_execute($connection, "get_image", array($userid));
+
+    $user = pg_fetch_array($res_image);
+
+    $fileExtesions = ["jpg", "jpeg", "png"];
+
+    foreach ($fileExtesions as $ext) {
+
+        $imagePath = "images/users/{$username}.{$ext}";
+
+        if (file_exists($imagePath)) {
+            break;
+        }
+
+    }
+
+    if (!file_exists($imagePath)) {
+        $imagePath = "images/users/default.png";
+    }
+
+    foreach ($news as $item) {
+        $color = 'black'; // цвет по умолчанию
+
+        if ($item['subject'] == 'Green') {
+            $color = 'green';
+        } else if ($item['subject'] == 'Red') {
+            $color = 'red';
+        } else if ($item['subject'] == 'Neutral') {
+            $color = 'gray';
+        }
+    }
+
+} catch (Exception $e) {
+
+    echo $e->getMessage();
+
+}
 ?>
+
+
 <!DOCTYPE html>
 <html>
 
@@ -104,17 +163,16 @@ if (!isset($_SESSION['userid'])) {
             <h2 class="mb-4">Отправка новости</h2>
             <form action="save_news.php" method="post">
                 <label>
-                    Date:
-                    <input type="date" name="date" />
+                    Какая новость:
+                    <select name="subject">
+                        <option value="Хорошая новость">Хорошая новость</option>
+                        <option value="Плохая новость">Плохая новость</option>
+                        <option value="Обычная">Обычная</option>
+                    </select>
                 </label>
                 <br>
                 <label>
-                    Subject:
-                    <input type="text" name="subject" />
-                </label>
-                <br>
-                <label>
-                    Message:
+                    Сообщение:
                     <textarea name="message"></textarea>
                 </label>
                 <br>
@@ -130,3 +188,5 @@ if (!isset($_SESSION['userid'])) {
 </body>
 
 </html>
+
+<ul>
